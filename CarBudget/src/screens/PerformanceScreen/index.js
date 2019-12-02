@@ -3,14 +3,14 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 import firebase from 'firebase';
 
-export default class HomeScreen extends React.Component {
+export default class PerformanceScreen extends React.Component {
   signOut = () => {
     firebase.auth().signOut();
   };
   render() {
     return (
       <View style={styles.container}>
-        <Text>HomeScreen</Text>
+        <Text>PerformanceScreen</Text>
         <TouchableOpacity onPress={this.signOut}>
           <Text>Sign Out</Text>
         </TouchableOpacity>

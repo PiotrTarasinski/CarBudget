@@ -1,118 +1,18 @@
-// import React from 'react';
-// import {
-//   SafeAreaView,
-//   StyleSheet,
-//   ScrollView,
-//   View,
-//   Text,
-//   StatusBar,
-// } from 'react-native';
-
-// import {
-//   Header,
-//   LearnMoreLinks,
-//   Colors,
-//   DebugInstructions,
-//   ReloadInstructions,
-// } from 'react-native/Libraries/NewAppScreen';
-
-// const App: () => React$Node = () => {
-//   return (
-//     <>
-//       <StatusBar barStyle="dark-content" />
-//       <SafeAreaView>
-//         <ScrollView
-//           contentInsetAdjustmentBehavior="automatic"
-//           style={styles.scrollView}>
-//           <Header />
-//           {global.HermesInternal == null ? null : (
-//             <View style={styles.engine}>
-//               <Text style={styles.footer}>Engine: Hermes</Text>
-//             </View>
-//           )}
-//           <View style={styles.body}>
-//             <View style={styles.sectionContainer}>
-//               <Text style={styles.sectionTitle}>Step One</Text>
-//               <Text style={styles.sectionDescription}>
-//                 Edit <Text style={styles.highlight}>App.js</Text> to change this
-//                 screen and then come back to see your edits.
-//               </Text>
-//             </View>
-//             <View style={styles.sectionContainer}>
-//               <Text style={styles.sectionTitle}>See Your Changes</Text>
-//               <Text style={styles.sectionDescription}>
-//                 <ReloadInstructions />
-//               </Text>
-//             </View>
-//             <View style={styles.sectionContainer}>
-//               <Text style={styles.sectionTitle}>Debug</Text>
-//               <Text style={styles.sectionDescription}>
-//                 <DebugInstructions />
-//               </Text>
-//             </View>
-//             <View style={styles.sectionContainer}>
-//               <Text style={styles.sectionTitle}>Learn More</Text>
-//               <Text style={styles.sectionDescription}>
-//                 Read the docs to discover what to do next:
-//               </Text>
-//             </View>
-//             <LearnMoreLinks />
-//           </View>
-//         </ScrollView>
-//       </SafeAreaView>
-//     </>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   scrollView: {
-//     backgroundColor: Colors.lighter,
-//   },
-//   engine: {
-//     position: 'absolute',
-//     right: 0,
-//   },
-//   body: {
-//     backgroundColor: Colors.white,
-//   },
-//   sectionContainer: {
-//     marginTop: 32,
-//     paddingHorizontal: 24,
-//   },
-//   sectionTitle: {
-//     fontSize: 24,
-//     fontWeight: '600',
-//     color: Colors.black,
-//   },
-//   sectionDescription: {
-//     marginTop: 8,
-//     fontSize: 18,
-//     fontWeight: '400',
-//     color: Colors.dark,
-//   },
-//   highlight: {
-//     fontWeight: '700',
-//   },
-//   footer: {
-//     color: Colors.dark,
-//     fontSize: 12,
-//     fontWeight: '600',
-//     padding: 4,
-//     paddingRight: 12,
-//     textAlign: 'right',
-//   },
-// });
-
-// export default App;
-
+import React from 'react';
 import { createAppContainer, createSwitchNavigator } from 'react-navigation';
+import { createBottomTabNavigator } from 'react-navigation-tabs';
 import { createStackNavigator } from 'react-navigation-stack';
+import Icon from 'react-native-ionicons';
 import firebase from 'firebase';
 
 import LoadingScreen from './src/screens/LoadingScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
 import LoginScreen from './src/screens/LoginScreen';
-import HomeScreen from './src/screens/HomeScreen';
+import CarInfoScreen from './src/screens/CarInfoScreen';
+import NotificationsScreen from './src/screens/NotificationsScreen';
+import AddExpenseScreen from './src/screens/AddExpenseScreen';
+import BudgetScreen from './src/screens/BudgetScreen';
+import PerformanceScreen from './src/screens/PerformanceScreen';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyC7uRnd1sb1iHNambzCRM_NmKOnXJBOcHw',
@@ -124,12 +24,91 @@ const firebaseConfig = {
   appId: '1:97343240859:web:c106018b83d4b0a4c5e43e',
   measurementId: 'G-331JDXTXMC',
 };
-// Initialize Firebase
+
 firebase.initializeApp(firebaseConfig);
 
-const AppStack = createStackNavigator({
-  Home: HomeScreen,
-});
+const AppContainer = createStackNavigator(
+  {
+    default: createBottomTabNavigator(
+      {
+        CarInfo: {
+          screen: CarInfoScreen,
+          navigationOptions: {
+            tabBarIcon: ({ tintColor }) => (
+              <Icon name="logo-model-s" size={28} color={tintColor} />
+            ),
+          },
+        },
+        Notifications: {
+          screen: NotificationsScreen,
+          navigationOptions: {
+            tabBarIcon: ({ tintColor }) => (
+              <Icon name="alert" size={28} color={tintColor} />
+            ),
+          },
+        },
+        AddExpense: {
+          screen: AddExpenseScreen,
+          navigationOptions: {
+            tabBarIcon: ({ tintColor }) => (
+              <Icon
+                name="add-circle"
+                size={42}
+                color={'#E9446A'}
+                style={{
+                  shadowColor: '#E9446A',
+                  shadowOffset: { width: 0, height: 0 },
+                  shadowRadius: 10,
+                  shadowOpacity: 0.3,
+                }}
+              />
+            ),
+          },
+        },
+        Budget: {
+          screen: BudgetScreen,
+          navigationOptions: {
+            tabBarIcon: ({ tintColor }) => (
+              <Icon name="wallet" size={28} color={tintColor} />
+            ),
+          },
+        },
+        Performance: {
+          screen: PerformanceScreen,
+          navigationOptions: {
+            tabBarIcon: ({ tintColor }) => (
+              <Icon name="speedometer" size={28} color={tintColor} />
+            ),
+          },
+        },
+      },
+      {
+        defaultNavigationOptions: {
+          tabBarOnPress: ({ navigation, defaultHandler }) => {
+            if (navigation.state.key === 'AddExpense') {
+              navigation.navigate('addExpenseModal');
+            } else {
+              defaultHandler();
+            }
+          },
+        },
+        tabBarOptions: {
+          activeTintColor: '#161F3D',
+          inactiveTintColor: '#B8BBC4',
+          showLabel: false,
+        },
+      },
+    ),
+    addExpenseModal: {
+      screen: AddExpenseScreen,
+    },
+  },
+  {
+    mode: 'modal',
+    headerMode: 'none',
+    // initialRouteName: "postModal"
+  },
+);
 
 const AuthStack = createStackNavigator({
   Login: LoginScreen,
@@ -140,7 +119,7 @@ export default createAppContainer(
   createSwitchNavigator(
     {
       Loading: LoadingScreen,
-      App: AppStack,
+      App: AppContainer,
       Auth: AuthStack,
     },
     {

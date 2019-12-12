@@ -13,6 +13,7 @@ import NotificationsScreen from './src/screens/NotificationsScreen';
 import AddExpenseScreen from './src/screens/AddExpenseScreen';
 import BudgetScreen from './src/screens/BudgetScreen';
 import PerformanceScreen from './src/screens/PerformanceScreen';
+import AddCarScreen from './src/screens/AddCarScreen';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyC7uRnd1sb1iHNambzCRM_NmKOnXJBOcHw',
@@ -101,6 +102,9 @@ const AppContainer = createStackNavigator(
     ),
     addExpenseModal: {
       screen: AddExpenseScreen,
+    },
+    addCarModal: {
+      screen: AddCarScreen,
     },
   },
   {

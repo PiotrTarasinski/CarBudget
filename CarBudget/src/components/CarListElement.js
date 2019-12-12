@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Icon from 'react-native-ionicons';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 export default class CarListElement extends React.Component {
   componentDidMount() {
@@ -8,12 +9,18 @@ export default class CarListElement extends React.Component {
   }
 
   render() {
-    const { car } = this.props;
+    const { car, isSelected } = this.props;
     return (
-      <View style={styles.container}>
+      <View style={isSelected ? styles.selectedCar : styles.container}>
         <View style={styles.carHeader}>
-          <Icon name="logo-model-s" size={28} color={'#585858'} />
-          <Text style={styles.carName}>{car.name}</Text>
+          <Icon
+            name="logo-model-s"
+            size={28}
+            color={isSelected ? '#161F3D' : '#585858'}
+          />
+          <Text style={isSelected ? styles.selectedcarName : styles.carName}>
+            {car.name}
+          </Text>
         </View>
         <View style={styles.carInfoText}>
           <Text style={styles.carInfoHeader}>Brand: </Text>
@@ -37,6 +44,7 @@ export default class CarListElement extends React.Component {
 
 const styles = StyleSheet.create({
   container: {
+    position: 'relative',
     width: '100%',
     marginVertical: 8,
     paddingHorizontal: 18,
@@ -68,5 +76,21 @@ const styles = StyleSheet.create({
   carInfoDetail: {
     fontSize: 16,
     color: '#585858',
+  },
+  selectedCar: {
+    width: '100%',
+    marginVertical: 8,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    borderRadius: 6,
+    backgroundColor: '#d3d3d3',
+    borderColor: '#161F3D',
+    borderWidth: 1,
+  },
+  selectedcarName: {
+    fontSize: 18,
+    marginLeft: 12,
+    fontWeight: 'bold',
+    color: '#161F3D',
   },
 });

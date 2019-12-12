@@ -12,17 +12,18 @@ import Icon from 'react-native-ionicons';
 import firebase from 'firebase';
 import 'firebase/firestore';
 
-export default class AddCarScreen extends React.Component {
+export default class EditCarScreen extends React.Component {
   state = {
     errorMessage: null,
-    name: '',
-    brand: '',
-    model: '',
-    mileage: '',
+    name: this.props.navigation.getParam('name'),
+    brand: this.props.navigation.getParam('brand'),
+    model: this.props.navigation.getParam('model'),
+    mileage: this.props.navigation.getParam('mileage'),
   };
 
   componentDidMount() {
     console.disableYellowBox = true;
+    console.log(this.props.navigation);
   }
 
   handleMileageChange = mileage => {
@@ -61,13 +62,14 @@ export default class AddCarScreen extends React.Component {
     return true;
   };
 
-  addCar = () => {
+  saveChanges = () => {
     const { name, brand, model, mileage } = this.state;
     if (this.validation(name, brand, model, mileage)) {
       firebase
         .firestore()
         .collection('cars')
-        .add({
+        .doc(this.props.navigation.getParam('id'))
+        .set({
           uid: firebase.auth().currentUser.uid,
           name,
           brand,
@@ -75,7 +77,7 @@ export default class AddCarScreen extends React.Component {
           mileage,
         })
         .then(res => {
-          this.selectCar(res.id);
+          this.selectCar(this.props.navigation.getParam('id'));
         })
         .catch(error => {
           console.log(error.message);
@@ -91,7 +93,23 @@ export default class AddCarScreen extends React.Component {
       .doc(firebase.auth().currentUser.uid)
       .set({ selectedCar: carId })
       .then(() => {
-        ToastAndroid.show('Car Added Successfully!', ToastAndroid.LONG);
+        ToastAndroid.show('Car Edited Successfully!', ToastAndroid.LONG);
+        this.props.navigation.goBack();
+      })
+      .catch(error => {
+        console.log(error.message);
+        ToastAndroid.show('Server Error Occurred!', ToastAndroid.LONG);
+      });
+  };
+
+  deleteCar = () => {
+    firebase
+      .firestore()
+      .collection('cars')
+      .doc(this.props.navigation.getParam('id'))
+      .delete()
+      .then(() => {
+        ToastAndroid.show('Car Deleted Successfully!', ToastAndroid.LONG);
         this.props.navigation.goBack();
       })
       .catch(error => {
@@ -107,8 +125,10 @@ export default class AddCarScreen extends React.Component {
           <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
             <Icon name="arrow-back" size={32} color="#E9446A" />
           </TouchableOpacity>
-          <Text style={styles.headerTitleText}>Add Car</Text>
-          <TouchableOpacity style={styles.headerButton} onPress={this.addCar}>
+          <Text style={styles.headerTitleText}>Edit Car</Text>
+          <TouchableOpacity
+            style={styles.headerButton}
+            onPress={this.saveChanges}>
             <Icon name="checkmark" size={32} color="#161F3D" />
           </TouchableOpacity>
         </View>
@@ -164,9 +184,21 @@ export default class AddCarScreen extends React.Component {
               )}
             />
           </View>
-          <TouchableOpacity style={styles.button} onPress={this.addCar}>
+          <TouchableOpacity
+            style={styles.saveChangesbutton}
+            onPress={this.saveChanges}>
             <Text style={{ color: '#FFF', fontWeight: '600', fontSize: 18 }}>
-              Add Car
+              Save Changes
+            </Text>
+          </TouchableOpacity>
+
+          <Text style={styles.orText}>Or</Text>
+
+          <TouchableOpacity
+            style={styles.deleteCarbutton}
+            onPress={this.deleteCar}>
+            <Text style={{ color: '#FFF', fontWeight: '600', fontSize: 18 }}>
+              Delete Car
             </Text>
           </TouchableOpacity>
         </View>
@@ -227,8 +259,22 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#161F3D',
   },
-  button: {
+  saveChangesbutton: {
     marginTop: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 52,
+    borderRadius: 4,
+    backgroundColor: '#161F3D',
+  },
+  orText: {
+    fontSize: 20,
+    textAlign: 'center',
+    fontWeight: 'bold',
+    color: '#d3d3d3',
+    paddingVertical: 8,
+  },
+  deleteCarbutton: {
     alignItems: 'center',
     justifyContent: 'center',
     height: 52,

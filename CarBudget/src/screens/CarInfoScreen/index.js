@@ -16,6 +16,8 @@ import { ScrollView } from 'react-native-gesture-handler';
 export default class CarInfoScreen extends React.Component {
   state = {
     carList: [],
+    selectedCar: null,
+    modalVisible: false,
   };
 
   componentDidMount() {
@@ -25,6 +27,7 @@ export default class CarInfoScreen extends React.Component {
   componentWillMount() {
     this.focusListener = this.props.navigation.addListener('didFocus', () => {
       this.getCarList();
+      this.getSelectedCar();
     });
   }
 
@@ -42,6 +45,33 @@ export default class CarInfoScreen extends React.Component {
           carList.push({ id: carId, ...carData });
         });
         this.setState({ carList });
+      })
+      .catch(error => {
+        ToastAndroid.show('Server Error Occurred!', ToastAndroid.LONG);
+      });
+  };
+
+  getSelectedCar = () => {
+    firebase
+      .firestore()
+      .collection('userInfo')
+      .doc(firebase.auth().currentUser.uid)
+      .get()
+      .then(res => {
+        if (res.data().selectedCar) {
+          this.setState({ selectedCar: res.data().selectedCar });
+        }
+      });
+  };
+
+  selectCar = carId => {
+    firebase
+      .firestore()
+      .collection('userInfo')
+      .doc(firebase.auth().currentUser.uid)
+      .set({ selectedCar: carId })
+      .then(() => {
+        this.setState({ selectedCar: carId });
       })
       .catch(error => {
         ToastAndroid.show('Server Error Occurred!', ToastAndroid.LONG);
@@ -66,9 +96,16 @@ export default class CarInfoScreen extends React.Component {
           {this.state.carList.map(car => {
             return (
               <TouchableOpacity
-                onPress={() => console.log(car)}
-                onLongPress={() => alert('elo')}>
-                <CarListElement car={car} />
+                onPress={() => this.selectCar(car.id)}
+                onLongPress={() =>
+                  this.props.navigation.navigate('editCarModal', {
+                    ...car,
+                  })
+                }>
+                <CarListElement
+                  car={car}
+                  isSelected={car.id === this.state.selectedCar}
+                />
               </TouchableOpacity>
             );
           })}

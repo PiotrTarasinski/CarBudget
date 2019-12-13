@@ -17,7 +17,6 @@ export default class CarInfoScreen extends React.Component {
   state = {
     carList: [],
     selectedCar: null,
-    modalVisible: false,
   };
 
   componentDidMount() {

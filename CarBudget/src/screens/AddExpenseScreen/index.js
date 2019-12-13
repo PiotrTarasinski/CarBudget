@@ -6,11 +6,11 @@ import {
   TouchableOpacity,
   TextInput,
   Picker,
+  ToastAndroid,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import firebase from 'firebase';
 import Icon from 'react-native-ionicons';
-import { Keyboard } from 'react-native';
 
 export default class AddExpenseScreen extends React.Component {
   state = {
@@ -33,7 +33,17 @@ export default class AddExpenseScreen extends React.Component {
       .get()
       .then(res => {
         if (res.data().selectedCar) {
-          this.setState({ selectedCar: res.data().selectedCar });
+          firebase
+            .firestore()
+            .collection('cars')
+            .doc(res.data().selectedCar)
+            .get()
+            .then(res => {
+              if (res.data()) {
+                this.setState({ selectedCar: { id: res.id, ...res.data() } });
+                this.setState({ mileage: res.data().mileage });
+              }
+            });
         }
       });
   };
@@ -48,7 +58,6 @@ export default class AddExpenseScreen extends React.Component {
   };
 
   show = mode => {
-    Keyboard.dismiss();
     this.setState({
       show: true,
       mode,
@@ -79,6 +88,74 @@ export default class AddExpenseScreen extends React.Component {
     }
   };
 
+  validate = () => {
+    const { date, mileage, cost } = this.state;
+    if (!date) {
+      this.setState({
+        errorMessage: 'Date is required',
+      });
+      return false;
+    }
+    if (!mileage) {
+      this.setState({
+        errorMessage: 'Mileage is required',
+      });
+      return false;
+    }
+    if (!cost) {
+      this.setState({
+        errorMessage: 'Cost is required',
+      });
+      return false;
+    }
+    return true;
+  };
+
+  addExpense = () => {
+    const { date, type, mileage, cost, description, selectedCar } = this.state;
+
+    console.log(date);
+
+    if (this.validate()) {
+      firebase
+        .firestore()
+        .collection('expenses')
+        .add({
+          uid: firebase.auth().currentUser.uid,
+          carId: selectedCar.id,
+          date,
+          type,
+          mileage,
+          cost,
+          description,
+        })
+        .then(res => {
+          this.updateCarMileage();
+        })
+        .catch(error => {
+          ToastAndroid.show('Server Error Occurred!', ToastAndroid.LONG);
+        });
+    }
+  };
+
+  updateCarMileage = () => {
+    const { mileage, selectedCar } = this.state;
+    if (mileage > selectedCar.mileage) {
+      firebase
+        .firestore()
+        .collection('cars')
+        .doc(selectedCar.id)
+        .update({ mileage })
+        .then(() => {
+          ToastAndroid.show('Added Expense!', ToastAndroid.LONG);
+          this.props.navigation.goBack();
+        });
+    } else {
+      ToastAndroid.show('Added Expense!', ToastAndroid.LONG);
+      this.props.navigation.goBack();
+    }
+  };
+
   componentDidMount() {
     console.disableYellowBox = true;
   }
@@ -100,6 +177,7 @@ export default class AddExpenseScreen extends React.Component {
       cost,
       description,
     } = this.state;
+
     return (
       <View style={styles.container}>
         {show && (
@@ -118,7 +196,7 @@ export default class AddExpenseScreen extends React.Component {
           <Text style={styles.headerTitleText}>Add Expense</Text>
           <TouchableOpacity
             style={styles.headerButton}
-            onPress={this.saveChanges}>
+            onPress={this.addExpense}>
             <Icon name="checkmark" size={32} color="#161F3D" />
           </TouchableOpacity>
         </View>
@@ -148,13 +226,23 @@ export default class AddExpenseScreen extends React.Component {
             <View style={styles.dateContainer}>
               <Text style={styles.inputTitle}>Date</Text>
               <Text style={styles.dateInfo} onPress={this.datepicker}>
-                {date.toLocaleDateString()}
+                {date.getDate() +
+                  '-' +
+                  (date.getMonth() + 1) +
+                  '-' +
+                  date.getFullYear()}
               </Text>
             </View>
             <View style={styles.timeContainer}>
               <Text style={styles.inputTitle}>Time</Text>
               <Text style={styles.dateInfo} onPress={this.timepicker}>
-                {date.toLocaleTimeString()}
+                {(date.getHours() <= 9
+                  ? '0' + date.getHours()
+                  : date.getHours()) +
+                  ':' +
+                  (date.getMinutes() <= 9
+                    ? '0' + date.getMinutes()
+                    : date.getMinutes())}
               </Text>
             </View>
           </View>
@@ -188,7 +276,6 @@ export default class AddExpenseScreen extends React.Component {
               style={styles.input}
               placeholder="Enter the description"
               autoCapitalize="none"
-              keyboardType="numeric"
               onChangeText={value => this.setState({ description: value })}
               value={description}
             />

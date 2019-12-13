@@ -39,9 +39,7 @@ export default class CarInfoScreen extends React.Component {
       .then(querySnapshot => {
         let carList = [];
         querySnapshot.forEach(doc => {
-          const carId = doc.id;
-          const carData = doc.data();
-          carList.push({ id: carId, ...carData });
+          carList.push({ id: doc.id, ...doc.data() });
         });
         this.setState({ carList });
       })
@@ -139,7 +137,6 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
-    paddingHorizontal: 12,
   },
   headerButton: {
     paddingHorizontal: 6,

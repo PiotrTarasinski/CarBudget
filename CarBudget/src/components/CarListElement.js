@@ -46,11 +46,10 @@ const styles = StyleSheet.create({
   container: {
     position: 'relative',
     width: '100%',
-    marginVertical: 8,
     paddingHorizontal: 18,
     paddingVertical: 12,
-    borderRadius: 6,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#f6f6f6',
+    opacity: 0.8,
   },
   carHeader: {
     flexDirection: 'row',
@@ -79,13 +78,12 @@ const styles = StyleSheet.create({
   },
   selectedCar: {
     width: '100%',
-    marginVertical: 8,
     paddingHorizontal: 18,
     paddingVertical: 12,
-    borderRadius: 6,
     backgroundColor: '#d3d3d3',
     borderColor: '#161F3D',
     borderWidth: 1,
+    opacity: 0.9,
   },
   selectedcarName: {
     fontSize: 18,

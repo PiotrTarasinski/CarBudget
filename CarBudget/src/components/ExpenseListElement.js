@@ -1,7 +1,5 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Icon from 'react-native-ionicons';
-import { TouchableOpacity } from 'react-native-gesture-handler';
 
 export default class ExpenseListElement extends React.Component {
   componentDidMount() {
@@ -10,7 +8,6 @@ export default class ExpenseListElement extends React.Component {
 
   render() {
     const { expense } = this.props;
-    console.log(expense);
     return (
       <View style={styles.container}>
         <Text style={styles.date}>
@@ -27,9 +24,14 @@ export default class ExpenseListElement extends React.Component {
             {expense.mileage.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1 ') + ' km'}
           </Text>
         </View>
-        <View style={styles.test}>
+        <View style={styles.costContainer}>
           <Text style={styles.cost}>{'-' + expense.cost + ' zł'}</Text>
         </View>
+        {expense.description !== '' && (
+          <View style={{ marginTop: 8 }}>
+            <Text>{expense.description}</Text>
+          </View>
+        )}
       </View>
     );
   }
@@ -45,7 +47,7 @@ const styles = StyleSheet.create({
     marginVertical: 4,
     backgroundColor: '#f6f6f6',
   },
-  test: {
+  costContainer: {
     position: 'absolute',
     top: 6,
     right: 12,

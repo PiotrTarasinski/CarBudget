@@ -15,6 +15,7 @@ import BudgetScreen from './src/screens/BudgetScreen';
 import PerformanceScreen from './src/screens/PerformanceScreen';
 import AddCarScreen from './src/screens/AddCarScreen';
 import EditCarScreen from './src/screens/EditCarScreen';
+import AddNotificationScreen from './src/screens/AddNotificationScreen';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyC7uRnd1sb1iHNambzCRM_NmKOnXJBOcHw',
@@ -36,17 +37,13 @@ const AppContainer = createStackNavigator(
         CarInfo: {
           screen: CarInfoScreen,
           navigationOptions: {
-            tabBarIcon: ({ tintColor }) => (
-              <Icon name="logo-model-s" size={28} color={tintColor} />
-            ),
+            tabBarIcon: ({ tintColor }) => <Icon name="logo-model-s" size={28} color={tintColor} />,
           },
         },
         Notifications: {
           screen: NotificationsScreen,
           navigationOptions: {
-            tabBarIcon: ({ tintColor }) => (
-              <Icon name="alert" size={28} color={tintColor} />
-            ),
+            tabBarIcon: ({ tintColor }) => <Icon name="alert" size={28} color={tintColor} />,
           },
         },
         AddExpense: {
@@ -70,17 +67,13 @@ const AppContainer = createStackNavigator(
         Budget: {
           screen: BudgetScreen,
           navigationOptions: {
-            tabBarIcon: ({ tintColor }) => (
-              <Icon name="wallet" size={28} color={tintColor} />
-            ),
+            tabBarIcon: ({ tintColor }) => <Icon name="wallet" size={28} color={tintColor} />,
           },
         },
         Performance: {
           screen: PerformanceScreen,
           navigationOptions: {
-            tabBarIcon: ({ tintColor }) => (
-              <Icon name="speedometer" size={28} color={tintColor} />
-            ),
+            tabBarIcon: ({ tintColor }) => <Icon name="speedometer" size={28} color={tintColor} />,
           },
         },
       },
@@ -107,6 +100,9 @@ const AppContainer = createStackNavigator(
     addCarModal: {
       screen: AddCarScreen,
     },
+    AddNotificationModal: {
+      screen: AddNotificationScreen,
+    },
     editCarModal: {
       screen: EditCarScreen,
     },
@@ -114,7 +110,6 @@ const AppContainer = createStackNavigator(
   {
     mode: 'modal',
     headerMode: 'none',
-    // initialRouteName: "postModal"
   },
 );
 

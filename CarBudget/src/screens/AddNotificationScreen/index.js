@@ -5,23 +5,24 @@ import {
   StyleSheet,
   TouchableOpacity,
   TextInput,
-  Picker,
+  CheckBox,
   ToastAndroid,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import firebase from 'firebase';
 import Icon from 'react-native-ionicons';
 
-export default class AddExpenseScreen extends React.Component {
+export default class AddNotificationScreen extends React.Component {
   state = {
     errorMessage: null,
     selectedCar: null,
     mode: 'date',
     show: false,
     date: new Date(),
-    type: 'Fuel',
+    dateNotification: true,
+    mileageNotification: false,
     mileage: '',
-    cost: '',
+    title: '',
     description: '',
   };
 
@@ -80,77 +81,76 @@ export default class AddExpenseScreen extends React.Component {
     }
   };
 
-  handleCostChange = cost => {
-    if (!isNaN(cost)) {
-      this.setState({
-        cost: cost,
-      });
-    }
-  };
-
   validate = () => {
-    const { date, mileage, cost } = this.state;
-    if (!date) {
+    const {
+      date,
+      mileage,
+      title,
+      dateNotification,
+      mileageNotification,
+    } = this.state;
+    if (!date && dateNotification) {
       this.setState({
         errorMessage: 'Date is required',
       });
       return false;
     }
-    if (!mileage) {
+    if (!mileage && mileageNotification) {
       this.setState({
         errorMessage: 'Mileage is required',
       });
       return false;
     }
-    if (!cost) {
+    if (!title) {
       this.setState({
-        errorMessage: 'Cost is required',
+        errorMessage: 'Title is required',
+      });
+      return false;
+    }
+    if (!mileageNotification && !dateNotification) {
+      this.setState({
+        errorMessage: 'You must check at least one checbkox',
       });
       return false;
     }
     return true;
   };
 
-  addExpense = () => {
-    const { date, type, mileage, cost, description, selectedCar } = this.state;
+  AddNotification = () => {
+    const {
+      date,
+      mileage,
+      description,
+      title,
+      mileageNotification,
+      dateNotification,
+      selectedCar,
+    } = this.state;
 
     if (this.validate()) {
       firebase
         .firestore()
-        .collection('expenses')
+        .collection('notifications')
         .add({
           uid: firebase.auth().currentUser.uid,
           carId: selectedCar.id,
           date,
-          type,
+          title,
           mileage,
-          cost,
           description,
+          mileageNotification,
+          dateNotification,
         })
         .then(res => {
-          this.updateCarMileage();
+          ToastAndroid.show(
+            'Notification Added Successfully!',
+            ToastAndroid.LONG,
+          );
+          this.props.navigation.goBack();
         })
         .catch(error => {
           ToastAndroid.show('Server Error Occurred!', ToastAndroid.LONG);
         });
-    }
-  };
-
-  updateCarMileage = () => {
-    const { mileage, selectedCar } = this.state;
-    if (mileage > selectedCar.mileage) {
-      firebase
-        .firestore()
-        .collection('cars')
-        .doc(selectedCar.id)
-        .update({ mileage })
-        .then(() => {
-          ToastAndroid.show('Added Expense!', ToastAndroid.LONG);
-          this.props.navigation.goBack();
-        });
-    } else {
-      ToastAndroid.show('Added Expense!', ToastAndroid.LONG);
-      this.props.navigation.goBack();
     }
   };
 
@@ -170,10 +170,11 @@ export default class AddExpenseScreen extends React.Component {
       date,
       mode,
       errorMessage,
-      type,
       mileage,
-      cost,
+      title,
       description,
+      dateNotification,
+      mileageNotification,
     } = this.state;
 
     return (
@@ -191,10 +192,10 @@ export default class AddExpenseScreen extends React.Component {
           <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
             <Icon name="arrow-back" size={32} color="#E9446A" />
           </TouchableOpacity>
-          <Text style={styles.headerTitleText}>Add Expense</Text>
+          <Text style={styles.headerTitleText}>Add Notification</Text>
           <TouchableOpacity
             style={styles.headerButton}
-            onPress={this.addExpense}>
+            onPress={this.AddNotification}>
             <Icon name="checkmark" size={32} color="#161F3D" />
           </TouchableOpacity>
         </View>
@@ -204,68 +205,14 @@ export default class AddExpenseScreen extends React.Component {
               <Text style={styles.error}>{this.state.errorMessage}</Text>
             )}
           </View>
-          <Text style={styles.inputTitle}>Type</Text>
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={type}
-              style={styles.picker}
-              onValueChange={itemValue => this.setState({ type: itemValue })}>
-              <Picker.Item label="Fuel" value="Fuel" />
-              <Picker.Item label="Parking" value="Parking" />
-              <Picker.Item label="Car Wash" value="Car Wash" />
-              <Picker.Item label="Repair" value="Repair" />
-              <Picker.Item label="Service" value="Service" />
-              <Picker.Item label="Mandate" value="Mandate" />
-              <Picker.Item label="Tuning" value="Tuning" />
-              <Picker.Item label="Other" value="Other" />
-            </Picker>
-          </View>
-          <View style={styles.dateTimeInfo}>
-            <View style={styles.dateContainer}>
-              <Text style={styles.inputTitle}>Date</Text>
-              <Text style={styles.dateInfo} onPress={this.datepicker}>
-                {date.getDate() +
-                  '-' +
-                  (date.getMonth() + 1) +
-                  '-' +
-                  date.getFullYear()}
-              </Text>
-            </View>
-            <View style={styles.timeContainer}>
-              <Text style={styles.inputTitle}>Time</Text>
-              <Text style={styles.dateInfo} onPress={this.timepicker}>
-                {(date.getHours() <= 9
-                  ? '0' + date.getHours()
-                  : date.getHours()) +
-                  ':' +
-                  (date.getMinutes() <= 9
-                    ? '0' + date.getMinutes()
-                    : date.getMinutes())}
-              </Text>
-            </View>
-          </View>
           <View style={{ marginTop: 18 }}>
-            <Text style={styles.inputTitle}>Car Mileage</Text>
+            <Text style={styles.inputTitle}>Title</Text>
             <TextInput
               style={styles.input}
-              placeholder="Enter your car mileage"
+              placeholder="Title notification"
               autoCapitalize="none"
-              keyboardType="numeric"
-              onChangeText={value =>
-                this.handleMileageChange(value.replace(/\ /g, ''))
-              }
-              value={mileage.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1 ')}
-            />
-          </View>
-          <View style={{ marginTop: 18 }}>
-            <Text style={styles.inputTitle}>Cost</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter the cost"
-              autoCapitalize="none"
-              keyboardType="numeric"
-              onChangeText={val => this.handleCostChange(val)}
-              value={cost}
+              onChangeText={value => this.setState({ title: value })}
+              value={title}
             />
           </View>
           <View style={{ marginTop: 18 }}>
@@ -278,6 +225,70 @@ export default class AddExpenseScreen extends React.Component {
               value={description}
             />
           </View>
+          <View>
+            <Text style={styles.notificateOn}>Notificate on:</Text>
+            <View style={styles.inline}>
+              <View style={styles.checkboxContainer}>
+                <CheckBox
+                  value={dateNotification}
+                  onValueChange={dateNotification =>
+                    this.setState({ dateNotification })
+                  }
+                />
+                <Text>Date</Text>
+              </View>
+              <View style={styles.checkboxContainer}>
+                <CheckBox
+                  value={mileageNotification}
+                  onValueChange={mileageNotification =>
+                    this.setState({ mileageNotification })
+                  }
+                />
+                <Text>Mileage</Text>
+              </View>
+            </View>
+          </View>
+          {dateNotification && (
+            <View style={styles.dateTimeInfo}>
+              <View style={styles.dateContainer}>
+                <Text style={styles.inputTitle}>Date</Text>
+                <Text style={styles.dateInfo} onPress={this.datepicker}>
+                  {date.getDate() +
+                    '-' +
+                    (date.getMonth() + 1) +
+                    '-' +
+                    date.getFullYear()}
+                </Text>
+              </View>
+              <View style={styles.timeContainer}>
+                <Text style={styles.inputTitle}>Time</Text>
+                <Text style={styles.dateInfo} onPress={this.timepicker}>
+                  {(date.getHours() <= 9
+                    ? '0' + date.getHours()
+                    : date.getHours()) +
+                    ':' +
+                    (date.getMinutes() <= 9
+                      ? '0' + date.getMinutes()
+                      : date.getMinutes())}
+                </Text>
+              </View>
+            </View>
+          )}
+          {mileageNotification && (
+            <View style={{ marginTop: 18 }}>
+              <Text style={styles.inputTitle}>Car Mileage</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your car mileage"
+                autoCapitalize="none"
+                keyboardType="numeric"
+                onChangeText={value =>
+                  this.handleMileageChange(value.replace(/\ /g, ''))
+                }
+                value={mileage.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1 ')}
+              />
+            </View>
+          )}
         </View>
       </View>
     );
@@ -285,6 +296,19 @@ export default class AddExpenseScreen extends React.Component {
 }
 
 const styles = StyleSheet.create({
+  inline: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  notificateOn: {
+    color: '#8A8F9E',
+    fontSize: 16,
+    paddingVertical: 8,
+  },
   container: {
     flex: 1,
   },
@@ -353,14 +377,5 @@ const styles = StyleSheet.create({
   },
   timeContainer: {
     width: '48%',
-  },
-  pickerContainer: {
-    borderColor: '#8A8F9E',
-    borderWidth: StyleSheet.hairlineWidth,
-    marginTop: 12,
-  },
-  picker: {
-    height: 50,
-    width: '100%',
   },
 });

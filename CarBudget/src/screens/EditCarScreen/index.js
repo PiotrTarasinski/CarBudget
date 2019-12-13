@@ -23,7 +23,6 @@ export default class EditCarScreen extends React.Component {
 
   componentDidMount() {
     console.disableYellowBox = true;
-    console.log(this.props.navigation);
   }
 
   handleMileageChange = mileage => {
